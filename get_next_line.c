@@ -6,48 +6,46 @@
 /*   By: kkihn <marvin@42.fr>                       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/29 12:54:27 by kkihn             #+#    #+#             */
-/*   Updated: 2018/11/29 12:54:48 by kkihn            ###   ########.fr       */
+/*   Updated: 2018/12/04 15:23:28 by kkihn            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*readcontent(char *s, int fd)
+int validation(int fd, char **line, char **s)
 {
-	char		buf[BUFF_SIZE + 1];
-	int			ret;
-
-	ret = 1;
-	while (ret > 0)
+    if (fd < 0 || line == NULL)
+		return (-1);
+	if (!*s)
 	{
-		ret = read(fd, buf, BUFF_SIZE);
-		if (ret < 0)
-			return (NULL);
-		buf[ret] = '\0';
-		s = ft_strjoin(s, buf);
+		if (!(*s = ft_strnew(1)))
+			return (-1);
 	}
-	int i = 0;
-	while (i < BUFF_SIZE + 1)
-	{
-		buf[i] = 0;
-		i++;
-	}
-	return (s);
+	else
+		*s = ft_strjoin(*s, "");
+    return (0);
 }
 
-int		get_next_line(const int fd, char **line)
+int     get_next_line(const int fd, char **line)
 {
-	static char	*s[258];
-	int			i;
+	static char *s[258];
+	int         i;
+	char        buf[BUFF_SIZE + 1];
+	int         ret;
+	char        *temp;
 
-	if (fd < 0 || line == NULL)
-		return (-1);
-	if (!s[fd])
-		if (!(s[fd] = (char *)malloc(sizeof(char) * (BUFF_SIZE + 1))))
+	ret = 1;
+	if (validation(fd, line, &s[fd]) == -1)
+        return (-1);
+    while (ft_strchr(s[fd], '\n') == NULL && ret > 0)
+	{
+		if ((ret = read(fd, buf, BUFF_SIZE)) < 0)
 			return (-1);
-	s[fd] = readcontent(s[fd], fd);
-	if (s[fd] == NULL)
-		return (-1);
+		buf[ret] = '\0';
+		temp = ft_strjoin(s[fd], buf);
+		free(s[fd]);
+		s[fd] = temp;
+	}
 	i = 0;
 	if (s[fd][i])
 	{
