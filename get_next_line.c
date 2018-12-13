@@ -11,20 +11,16 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
 
 static int	fill_line(char **line, char *s)
 {
 	char *str;
-	printf("s = %s\n", s);
+
 	str = ft_strchr(s, '\n');
-	printf("str = %s\n", str);
 	if (str)
 	{
 		str[0] = '\0';
-		printf("s = %s\n", s);
 		*line = ft_strdup(s);
-		printf("line = %s\n", *line);
 		ft_memmove(s, &str[1], ft_strlen(&str[1]) + 1);
 		return (1);
 	}
@@ -39,24 +35,24 @@ static int	fill_line(char **line, char *s)
 
 int			get_next_line(const int fd, char **line)
 {
-	static char *s[11000];
+	static char *s[MAX_FD];
 	char		buf[BUFF_SIZE + 1];
 	int			ret;
 	char		*temp;
 
 	ret = 1;
-	if (fd < 0 || line == NULL)
+	if (fd < 0 || !line || fd >= MAX_FD || BUFF_SIZE <= 0)
 		return (-1);
 	if (!s[fd])
 	{
-		if (!(s[fd] = ft_strnew(1)))
+		if (!(s[fd] = ft_strnew(0)))
 			return (-1);
 	}
 	else
 		s[fd] = ft_strjoin(s[fd], "");
 	while (ft_strchr(s[fd], '\n') == NULL && ret > 0)
 	{
-		if ((ret = read(fd, buf, BUFF_SIZE)) < 0)
+		if ((ret = read(fd, buf, BUFF_SIZE)) == -1)
 			return (-1);
 		buf[ret] = '\0';
 		temp = ft_strjoin(s[fd], buf);
